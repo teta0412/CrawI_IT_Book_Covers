@@ -3,6 +3,7 @@
 ##pip install beautifulsoup4
 ##pip install langdetect
 ##pip install pandas
+##pip install XlsxWriter
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,10 +11,23 @@ from langdetect import detect
 import csv
 import os
 import pandas as pd
-from concurrent.futures import ThreadPoolExecutor
+import xlsxwriter
 
 
-def crawl_site():
+def crawl_giaotrinhpdf_site():
+    data = []
+    for page in range (1,2):
+        site_url = 'https://giaotrinhpdf.com/tags/cong-nghe-thong-tin/trang-'+ str(page) +'.html#google_vignette'
+        res = requests.get(site_url)
+        soup = BeautifulSoup(res.text,'lxml')
+        html = soup.find('div',class_='tab-content')
+        img_urls = html.find_all('img')
+        for url in img_urls:
+            tmp = 'https://giaotrinhpdf.com/'
+            img_url = {'url': tmp + url['data-src']}
+            data.append(img_url)
+    print(data)
+def crawl_nhasachlt_site():
     data = []
     for page in range(1,19):
         site_url = 'https://nhasachlaptrinh.com/sach-cong-nghe-thong-tin-pc218844.html?page='+str(page)
@@ -45,15 +59,18 @@ def download_image(url, folder):
     return False
 
 
-crawl_site()
-df = pd.read_csv('IT_Book_datasets.csv')
+# crawl_site()
+# df = pd.read_csv('IT_Book_datasets.csv')
+#
+# # Create a folder to store the images
+# output_folder = '/Users/anhducnguyen/PycharmProjects/CrawI_IT_Books/images'
+# os.makedirs(output_folder, exist_ok=True)
+#
+# for url in df['image_url']:
+#     download_image(url, output_folder)
+#
+# print("Download completed!")
 
-# Create a folder to store the images
-output_folder = '/Users/anhducnguyen/PycharmProjects/CrawI_IT_Books/images'
-os.makedirs(output_folder, exist_ok=True)
+crawl_giaotrinhpdf_site()
 
-for url in df['image_url']:
-    download_image(url, output_folder)
-
-print("Download completed!")
 
